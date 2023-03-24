@@ -1,0 +1,50 @@
+version: '3.9'
+services:
+
+### POSTGRES DATABASE  ###
+    postgres:
+        image: postgres:14-alpine
+        restart: always
+        ports: 
+          - "5432:5432"
+        environment:
+              POSTGRES_DB: dscatalog
+              POSTGRES_USER: postgres
+              POSTGRES_PASSWORD: 15963480
+        networks:
+          - postgres
+        volumes:
+          - pgdata:/var/lib/postgresql/data
+
+    
+### API Spring Boot ###
+    api:
+      build:
+        dockerfile: Dockerfile 
+        context: ./application
+      depends_on:
+        - postgres
+      environment:
+        DATABASE_URL: postgresql://postgres:5432/dscatalog
+        DATABASE_USERNAME: postgres
+        DATABASE_PASSWORD: 15963480
+      ports:
+        - "8080:8080"
+      networks:
+        - postgres
+
+### API Spring Boot ###
+    interface:
+      build:
+        dockerfile: Dockerfile
+        context: ./server-interface
+      ports:
+       - "3000:80"
+volumes:
+  pgdata:
+
+networks:
+  postgres:
+    driver: bridge
+    ipam:
+      driver: default
