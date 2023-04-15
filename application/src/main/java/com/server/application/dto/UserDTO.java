@@ -13,7 +13,7 @@ public class UserDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "O campo é obrigatório")
     private String firstName;
@@ -29,7 +29,7 @@ public class UserDTO implements Serializable {
     public UserDTO() {
     }
 
-    public UserDTO(Integer id, String firstName, String lastName, String email) {
+    public UserDTO(Long id, String firstName, String lastName, String email) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,11 +46,11 @@ public class UserDTO implements Serializable {
 
 
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

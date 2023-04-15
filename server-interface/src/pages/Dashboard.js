@@ -55,8 +55,8 @@ function Dashboard() {
     setServer({...server, [e.target.name]: e.target.value})
   }
 
-  function createServer(server){
-      Api.post("/save", server)
+  async function createServer(server){
+      await Api.post("/save", server)
       .then(() => navigate("/server"))
       .catch(err => console.log(err))
   }
@@ -146,7 +146,6 @@ function Dashboard() {
                     <button type="submit" 
                         className="btn btn-success">
                         <i  className="fas fa-spinner fa-spin"></i>
-                        <span >Saving...</span>
                         <span >Add</span>
                     </button>
                 </div>

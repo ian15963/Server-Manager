@@ -12,6 +12,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final AuthEntryPointJwt authEntryPointJwt;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -26,18 +29,20 @@ public class SecurityConfig {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
 
+        config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:3000");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("DELETE");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("POST");
+        config.setAllowedHeaders(Arrays.asList("Origin", "Access-Control-Allow-Origin", "Content-Type",
+                "Accept", "Jwt-Token", "Authorization", "Origin, Accept", "X-Requested-With",
+                "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        config.setAllowedMethods(Arrays.asList("DELETE", "GET", "PUT", "POST", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
         
         http.csrf().disable()
-                .cors().configurationSource(source).and()
+                .cors()
+                .configurationSource(source).and()
+                .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth").permitAll()
+                .requestMatchers("/api/auth", "/refreshtoken").permitAll()
                 .requestMatchers("/server/**").hasAnyRole("CLIENT", "ADMIN")
                 .anyRequest().hasAnyRole("ADMIN").and()
                 .sessionManagement()
@@ -51,3 +56,4 @@ public class SecurityConfig {
 
 
 }
+

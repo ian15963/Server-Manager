@@ -3,13 +3,13 @@ import Api from "../axios/config"
 const Table = ({servers, setServers}) =>{
 
 
-    function pingServer(ipAddress){
-         Api.get(`/ping/${ipAddress}`)
+    async function pingServer(ipAddress){
+         await Api.get(`/ping/${ipAddress}`)
         .catch(err => console.log(err))
     }
 
-    function deleteServer(id){
-         Api.delete(`/delete/${id}`)
+    async function deleteServer(id){
+         await Api.delete(`/delete/${id}`)
         .then(() =>{
             setServers(servers.filter((server) => server.id !== id))
         }).catch(err => console.log(err))
@@ -42,13 +42,13 @@ const Table = ({servers, setServers}) =>{
                     <span className={`${server.status === "SERVER_UP" ? "badge text-bg-success": "badge text-bg-danger"}`}>{server.status === "SERVER_UP" ? "SERVER_UP" : "SERVER_DOWN"}</span>
                 </td>
                 <td>
-                    <a href="" onClick={() => pingServer(server.ipAddress)}>
+                    <a href="#" onClick={() => pingServer(server.ipAddress)}>
                         <i
                             className="bi bi-bar-chart-fill" title="Ping server"></i>
                     </a>
                 </td>
                 <td>
-                    <a href="" name="delete" data-toggle="modal"><i className="bi bi-trash" data-toggle="tooltip"
+                    <a href="#" name="delete" data-toggle="modal"><i className="bi bi-trash" data-toggle="tooltip"
                             title="Delete" onClick={() => deleteServer(server.id)} style={{color: 'Red'}}></i></a>
                 </td> 
               </tr>

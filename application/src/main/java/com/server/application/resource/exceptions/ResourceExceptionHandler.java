@@ -2,6 +2,7 @@ package com.server.application.resource.exceptions;
 
 import com.server.application.service.exceptions.DatabaseException;
 import com.server.application.service.exceptions.ResourceNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,4 +56,5 @@ public class ResourceExceptionHandler {
 
 		return ResponseEntity.status(status).body(err);
 	}
+
 }
