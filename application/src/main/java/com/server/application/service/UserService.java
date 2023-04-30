@@ -3,6 +3,7 @@ package com.server.application.service;
 import com.server.application.dto.RoleDTO;
 import com.server.application.dto.UserDTO;
 import com.server.application.dto.UserInsertDTO;
+import com.server.application.dto.UserUpdateDTO;
 import com.server.application.email.EmailService;
 import com.server.application.model.Role;
 import com.server.application.model.User;
@@ -23,6 +24,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,11 +71,11 @@ public class UserService implements UserDetailsService {
 		String token = UUID.randomUUID().toString();
 		verificationTokenService.createVerificationToken(entity, token);
 
-		String link = "http://localhost:8080/registrationConfirm?token=" + token;
+		String link = "http://localhost:8080/management/confirmUser?token=" + token;
 
 		String email = emailService.send(entity, "Confirm your registration", "Click the link to confirm your account " + link);
 
-		return "Email de confirmação enviado";
+		return email;
 	}
 
 	@Transactional
@@ -121,4 +125,39 @@ public class UserService implements UserDetailsService {
 		}
 		return user;
 	}
+
+	public String passwordRecoveryCode(String email){
+		User user = repository.findByEmail(email).get();
+		user.setRecoveryCode(getPasswordRecoveryCode(user.getId()));
+		user.setDateRecoveryCode(new Date());
+		repository.save(user);
+
+		emailService.send(user, "Password recovery code", "Here is your code \n" + user.getRecoveryCode());
+
+		return "Código Enviado";
+	}
+
+	public String getPasswordRecoveryCode(Long id){
+		DateFormat format = new SimpleDateFormat("ddMMyyyyHHmmss");
+		return format.format(new Date()) + id;
+	}
+
+	public String alterPassword(UserUpdateDTO user){
+		User entity = repository.findByEmail(user.getEmail()).get();
+		if(entity != null){
+			Date differenceDate = new Date(new Date().getTime() - entity.getDateRecoveryCode().getTime());
+			if(differenceDate.getTime()/1000 < 900 && entity.getRecoveryCode() != null){
+				entity.setPassword(passwordEncoder.encode(user.getPassword()));
+				entity.setRecoveryCode(null);
+				entity.setDateRecoveryCode(null);
+				repository.save(entity);
+				return "Senha alterada com sucesso";
+			}else{
+				return "Tempo expirado ou código ínvalido";
+			}
+		}else{
+			return "Email não encontrado";
+		}
+	}
+
 }

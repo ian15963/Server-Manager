@@ -21,6 +21,9 @@ public class User implements UserDetails {
     private String lastName;
     @Column(unique = true)
     private String email;
+    private String recoveryCode;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateRecoveryCode;
     private String password;
     private boolean enabled = false;
 
@@ -86,6 +89,22 @@ public class User implements UserDetails {
 
     public void setTokens(List<Token> tokens) {
         this.tokens = tokens;
+    }
+
+    public String getRecoveryCode() {
+        return recoveryCode;
+    }
+
+    public void setRecoveryCode(String recoveryCode) {
+        this.recoveryCode = recoveryCode;
+    }
+
+    public Date getDateRecoveryCode() {
+        return dateRecoveryCode;
+    }
+
+    public void setDateRecoveryCode(Date dateRecoveryCode) {
+        this.dateRecoveryCode = dateRecoveryCode;
     }
 
     @Override

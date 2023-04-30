@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .configurationSource(source).and()
                 .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth", "/refreshtoken").permitAll()
+                .requestMatchers("/api/auth", "/refreshtoken", "/management/**").permitAll()
                 .requestMatchers("/server/**").hasAnyRole("CLIENT", "ADMIN")
                 .anyRequest().hasAnyRole("ADMIN").and()
                 .sessionManagement()

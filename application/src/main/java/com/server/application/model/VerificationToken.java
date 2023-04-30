@@ -31,4 +31,7 @@ public class VerificationToken {
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
     }
+
+    public VerificationToken() {
+    }
 }
