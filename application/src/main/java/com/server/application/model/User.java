@@ -22,7 +22,7 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
     private String password;
-    private String matchingPassword;
+    private boolean enabled = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_user_role",
@@ -76,12 +76,16 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public String getMatchingPassword() {
-        return matchingPassword;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
-    public void setMatchingPassword(String matchingPassword) {
-        this.matchingPassword = matchingPassword;
+    public List<Token> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<Token> tokens) {
+        this.tokens = tokens;
     }
 
     @Override
@@ -115,7 +119,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 
     public void setPassword(String password) {

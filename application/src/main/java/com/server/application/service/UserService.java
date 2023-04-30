@@ -3,6 +3,7 @@ package com.server.application.service;
 import com.server.application.dto.RoleDTO;
 import com.server.application.dto.UserDTO;
 import com.server.application.dto.UserInsertDTO;
+import com.server.application.email.EmailService;
 import com.server.application.model.Role;
 import com.server.application.model.User;
 import com.server.application.repo.RoleRepository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -35,6 +37,12 @@ public class UserService implements UserDetailsService {
 	
 	@Autowired
 	private RoleRepository roleRepository;
+
+	@Autowired
+	private VerificationTokenService verificationTokenService;
+
+	@Autowired
+	private EmailService emailService;
 	
 	@Transactional(readOnly = true)
 	public Page<UserDTO> findAllPaged(Pageable pageable) {
@@ -50,12 +58,20 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Transactional
-	public UserDTO insert(UserInsertDTO dto) {
+	public String insert(UserInsertDTO dto) {
 		User entity = new User();
 		copyDtoToEntity(dto, entity);
 		entity.setPassword(passwordEncoder.encode(dto.getPassword()));
 		entity = repository.save(entity);
-		return new UserDTO(entity);
+
+		String token = UUID.randomUUID().toString();
+		verificationTokenService.createVerificationToken(entity, token);
+
+		String link = "http://localhost:8080/registrationConfirm?token=" + token;
+
+		String email = emailService.send(entity, "Confirm your registration", "Click the link to confirm your account " + link);
+
+		return "Email de confirmação enviado";
 	}
 
 	@Transactional
