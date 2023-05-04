@@ -1,5 +1,6 @@
 package com.server.application.service;
 
+import com.server.application.email.EmailService;
 import com.server.application.model.User;
 import com.server.application.model.VerificationToken;
 import com.server.application.repo.UserRepository;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class VerificationTokenService {
@@ -18,6 +21,9 @@ public class VerificationTokenService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private EmailService emailService;
 
     public VerificationToken getVerificationToken(String VerificationToken) {
         return tokenRepository.findByToken(VerificationToken).orElseThrow(() ->
@@ -51,6 +57,15 @@ public class VerificationTokenService {
         repository.save(user);
 
         return token;
+    }
+
+    public String resendVerificationToken(String userEmail){
+        Optional<User> user = repository.findByEmail(userEmail);
+        String token = UUID.randomUUID().toString();
+        createVerificationToken(user.get(), token);
+        String link = "http://localhost:8080/management/confirmUser?token=" + token;
+        String email = emailService.send(user.get(), "Confirm your registration", "Click the link to confirm your account " + link );
+        return email;
     }
 
 }

@@ -1,39 +1,22 @@
 import { createContext, useState, useEffect } from "react";
 import Api from "../axios/config";
 import { useNavigate } from "react-router-dom";
-import Cookies from "universal-cookie/cjs/Cookies";
+
 
 const AuthContext = createContext();
 
 function AuthenticationProvider({children}){
 
-    const cookie = new Cookies();
     const navigate = useNavigate();
-    const[authenticated, setAuthenticated] = useState(false);
-    const[loading, setLoading] = useState(true)
-    let refresh = false
-
-    function getAccessToken() {
-        const accessToken = cookie.get("accessToken");
-        return accessToken;
-    }
-
-      function getRefreshToken() {
-        const refreshToken = cookie.get("refreshToken");
-        return refreshToken;
+    const[authenticated, setAuthenticated] = useState(() =>{     
+      let userAuthenticated = localStorage.getItem("authenticated")
+        if(userAuthenticated){
+          return true
       }
+      return false
+    });
+    const[loading, setLoading] = useState(true)
 
-    Api.interceptors.request.use(
-        (config) =>{
-            const token = getAccessToken()
-            if(token) {
-                config.headers["Authorization"] = `Bearer ${token}`
-            }
-            return config
-        },(error) => {
-          return Promise.reject(error);
-        }
-    )
     Api.interceptors.response.use(
       (res) => {
         return res;
@@ -47,16 +30,11 @@ function AuthenticationProvider({children}){
             originalConfig._retry = true;
 
             try {
-              const response = await refreshToken();
-    
+              await refreshToken();                 
+  
 
-              if(response.status === 200){
-                console.log(response.data)
-                Api.defaults.headers.Authorization = `Bearer ${response.data.accessToken}`
-                  
-    
               return Api(originalConfig);
-            }} catch (_error) {
+            } catch (_error) {
               return Promise.reject(_error);
             }
           }}
@@ -65,13 +43,6 @@ function AuthenticationProvider({children}){
   )
 
     useEffect(() => {
-
-      const token = getAccessToken()
-
-      if(token){
-        Api.defaults.headers.Authorization = `Bearer ${token}`
-        setAuthenticated(true)
-      }
 
       setLoading(false)
 
@@ -82,27 +53,21 @@ function AuthenticationProvider({children}){
         return new Promise((resolve, reject) => {
           try{
            Api.post("http://localhost:8080/refreshtoken", {
-          refreshToken: getRefreshToken()
           }, {withCredentials: true}).then(async (res) =>{
-            cookie.set("accessToken", JSON.stringify(res.data.accessToken))
-            cookie.set("refreshToken", JSON.stringify(res.data.refreshToken))
             return resolve(res)
           });
         } catch (err) {
+          localStorage.removeItem("authenticated")
           return reject(err);
         }
       })}
 
     async function handleLogin(user){
 
-        const res = await Api.post("http://localhost:8080/api/auth", user, {withCredentials: true})
-        const { token, refreshToken } = res.data;
-        console.log(token)
-        Api.defaults.headers.Authorization = `Bearer ${token}`
-        cookie.set("accessToken", JSON.stringify(token))
-        cookie.set("refreshToken", JSON.stringify(refreshToken))
+        await Api.post("http://localhost:8080/api/auth", user, {withCredentials: true})
         navigate("/server")
         setAuthenticated(true)
+        localStorage.setItem("authenticated", true)
 
     }
 
@@ -111,7 +76,7 @@ function AuthenticationProvider({children}){
     }
 
     return(
-        <AuthContext.Provider value={{ authenticated, setAuthenticated, handleLogin, cookie}}>
+        <AuthContext.Provider value={{ authenticated, setAuthenticated, handleLogin}}>
             {children}
         </AuthContext.Provider>
     )

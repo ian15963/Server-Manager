@@ -1,6 +1,5 @@
 package com.server.application.model;
 
-import com.server.application.token.Token;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,9 +31,6 @@ public class User implements UserDetails {
     joinColumns = @JoinColumn(name = "user_id"),
     inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
-
-    @OneToMany(mappedBy = "user")
-    private List<Token> tokens;
 
     public User() {
     }
@@ -83,12 +79,8 @@ public class User implements UserDetails {
         this.enabled = enabled;
     }
 
-    public List<Token> getTokens() {
-        return tokens;
-    }
-
-    public void setTokens(List<Token> tokens) {
-        this.tokens = tokens;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public String getRecoveryCode() {

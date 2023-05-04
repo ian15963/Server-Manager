@@ -4,12 +4,12 @@ const Table = ({servers, setServers}) =>{
 
 
     async function pingServer(ipAddress){
-         await Api.get(`/ping/${ipAddress}`)
+         await Api.get(`/ping/${ipAddress}`,{withCredentials: true})
         .catch(err => console.log(err))
     }
 
     async function deleteServer(id){
-         await Api.delete(`/delete/${id}`)
+         await Api.delete(`/delete/${id}`, {withCredentials: true})
         .then(() =>{
             setServers(servers.filter((server) => server.id !== id))
         }).catch(err => console.log(err))

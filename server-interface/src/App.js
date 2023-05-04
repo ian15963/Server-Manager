@@ -4,7 +4,9 @@ import Login from "./pages/Login"
 import './App.css'
 import { AuthenticationProvider } from "./context/AuthenticationProvider";
 import PrivateRoute from "./components/PrivateRoute";
-
+import Register from "./pages/Register";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
 
@@ -17,10 +19,11 @@ function App() {
             </Route>
             <Route element={<Login/>} exact path="/"/>
             <Route element={<Login/>} path="/login"/>
-            
+            <Route element={<Register/>} path="/signup"/>
             <Route element={() => <Navigate to="/server" replace/>} path="*"/>  
           </Routes>
         </AuthenticationProvider>
+        <ToastContainer/>
       </Router>
     
   )

@@ -3,6 +3,8 @@ import {useEffect, useState} from 'react';
 import Api from '../axios/config';
 import Table from '../components/Table';
 import {useNavigate} from 'react-router-dom'
+import { toast } from 'react-toastify';
+
 
 function Dashboard() {
 
@@ -10,7 +12,7 @@ function Dashboard() {
   const[filteredServer, setFilteredServer] = useState([])
   const[server, setServer] = useState({});
 
-  const navigate = useNavigate();
+  let navigate = useNavigate();
 
   function printReport(){
     let dataType = 'application/vnd.ms-excel.sheet.macroEnabled.12';
@@ -36,7 +38,7 @@ function Dashboard() {
   }
   useEffect(() =>{
     const fetchServer = async () => {
-      await Api.get('/list')
+      await Api.get('/list', {withCredentials: true})
       .then((resp) =>{
         setServers(resp.data.content)
         setFilteredServer(resp.data.content)
@@ -56,9 +58,16 @@ function Dashboard() {
   }
 
   async function createServer(server){
-      await Api.post("/save", server)
-      .then(() => navigate("/server"))
-      .catch(err => console.log(err))
+      await Api.post("/save", server, {withCredentials: true})
+      .then((resp) => {
+        navigate("/")
+        toast.success("Servidor criado com sucesso")
+    })
+      .catch(err => {
+        console.log(err)
+        //toast.error(err.getMessage)
+      }
+      )
   }
 
   function submit(e){
@@ -144,8 +153,7 @@ function Dashboard() {
                         Cancel
                     </button>
                     <button type="submit" 
-                        className="btn btn-success">
-                        <i  className="fas fa-spinner fa-spin"></i>
+                        className="btn btn-success" data-bs-dismiss="modal">
                         <span >Add</span>
                     </button>
                 </div>
@@ -153,7 +161,7 @@ function Dashboard() {
         </div>
     </div>
 </div>
-  </div>
+</div>
   );
 }
 

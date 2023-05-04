@@ -28,6 +28,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -67,7 +68,9 @@ public class UserService implements UserDetailsService {
 		copyDtoToEntity(dto, entity);
 		entity.setPassword(passwordEncoder.encode(dto.getPassword()));
 		entity = repository.save(entity);
-
+		if(entity.getRoles().isEmpty()) {
+			entity.setRoles(roleRepository.findByAuthority("ROLE_CLIENT"));
+		}
 		String token = UUID.randomUUID().toString();
 		verificationTokenService.createVerificationToken(entity, token);
 
@@ -149,7 +152,6 @@ public class UserService implements UserDetailsService {
 			if(differenceDate.getTime()/1000 < 900 && entity.getRecoveryCode() != null){
 				entity.setPassword(passwordEncoder.encode(user.getPassword()));
 				entity.setRecoveryCode(null);
-				entity.setDateRecoveryCode(null);
 				repository.save(entity);
 				return "Senha alterada com sucesso";
 			}else{
